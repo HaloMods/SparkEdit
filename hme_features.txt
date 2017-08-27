@@ -1,0 +1,62 @@
+Grenadiac
+-----------------------------------------------------------
+Skills:  C, C++ (9 years), Reverse Engineering, MFC, OpenGL,
+         Software Architecture design, Windows system programming
+
+-----------------------------------------------------------
+Expectations:
+
+I expect that the early stages of this project will focus on the following:
+
+-Document current knowledge of map files and structure formats
+-Design the architecture of HME to optimize portability and document this
+-Comment all existing code (file headers and function headers)
+-becoming familiar with existing source code
+-determine the final feature list and scope of the project
+
+-----------------------------------------------------------
+Feature List:
+
+-What are the goals?
+  -decide which parts we can do better than SDK
+  -avoid duplicating SDK existing functionality (too much work)
+  -focus on what is missing from the current state of things
+  -Goal #1 combine SparkEdit and HMT existing functionality?
+  -Make editing more interactive
+
+-Architecture
+  -Decide:  Tag based editor or compiled map editor?
+  -Decide:  MFC or .NET for GUI portion
+  -OpenGL (portable to Macintosh)
+  -Portable code (GUI separate from core functionality)
+  -Leverage off of existing code (MFC)
+  -Modify SparkEdit architecture to optimize portability (20-30% code rewrite)
+  -Create a document describing the proposed architecture for HME
+
+-Busy Work
+  -port HMT code to C++
+  -Port CFile and CString functionality (used member functions) to portable (non-MFC) classes
+  -Comment SparkEdit code
+
+-Reverse Engineering
+  -Biggest obstacle is BSP format, only about 20-30% is understood
+  -Combine structure existing structure definitions
+  -we need to document what we know and understand (a mapfile document)
+    -recursive tag organization
+	-BSP format
+	-known and understood tags
+
+-Scenario Editing
+  -tag placment and rotation
+
+-Modders Features
+  -built in hex tag editor
+  -Tag Editing for useful tags (physics, etc)
+  -Tag Decompiler
+  -mesh/model selection to view properties (poly count, shaders, textures)
+  -Model skinning preview
+  -texture injection
+  -model hierarchy viewer (tree control)
+  -click on object, get properties (related tags)
+  -Shader preview
+  -Shader editor

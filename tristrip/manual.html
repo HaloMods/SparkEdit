@@ -1,0 +1,578 @@
+<html>
+<body bgcolor="#ffffff">
+
+<title>Triangle Consolidator 1.1</title>
+<h1>Triangle Consolidator 1.1</h1>
+
+<center><h2>Introduction</h2></center>
+
+I imagine most people would only have come looking for TC if they
+knew what they wanted in the first place.  The programmers' guide
+that you probably want is in the next section.  The following is
+just a little purpose and history.<p>
+
+TC, or "triangle consolidator", constructs triangle strips or triangle
+fans from independent triangle data.  The geometric transformation of
+3D points onto a 2D screen involves some heavy math, and you can realize
+a performance benefit by reusing the results of that math where possible.
+Each new triangle strip or fan is constructed from one of the edges of
+the previous triangle and a new vertex. <p>
+
+<center><img src=prims.gif></center><p>
+
+You can achieve 3x performance minus the cost of
+transforming the first two vertices per strip.  Thus it's important
+that strips and fans are made as long as possible (fewer strips and
+fans).  Some architectures have a
+maximum preferred strip length, after which the engine may stall.<p>
+
+I wrote <i>meshifier</i> in 1995 because Sharon Clay at Silicon Graphics
+asked me how I might construct strips from a lattice of triangles
+as an interview question.  It has some fundamental architectural
+limitations.  Some, like an error in the reset code and being able
+to specify that triangles should not be output in reverse order,
+have been fixed by Neal Tringham and are incorporated in the new version
+available from his web page.  Others, such as the limitation on numbers
+of vertices and connectivity, are harder to repair.<p>
+
+In "TC" I've attempted to fix those old errors.
+TC attempts to consolidate triangles limited only by the
+limits of the machine' available memory and
+speed.  I have changed the API, using OpenGL as a loose model
+(although OpenGL arguably has its shape because it provides a hardware
+abstraction layer), so that more algorithmic abstractions and
+optimizations are possible.  I have tried to build in features which
+are useful to modelers and offline optimization tools, such as whether
+or not to honor vertex ordering.  I have also spent a few days
+trying to test the code nominally and attempt to have some confidence
+that even its low-memory behavior is predictable.<p>
+
+I hope you find it useful. ---<a href="mailto:grantham@plunk.org">Brad
+Grantham</a><p>
+
+<p><hr><p>
+
+<center><h2>Triangle Consolidator API</h2></center>
+
+TC is meant to be used in an offline modeling process.  It is probably
+too slow to be used to optimize data per frame for the purpose of
+interactive display.  It also does not provide any facility (yet) for
+merging spacial coordinates together to form an indexed vertex list.  TC only
+operates on the indices of indexed triangles.  Maintaining the actual
+vertex array (containing the traditional v3f, n3f, etc) is up to the
+application.  I perceive this is useful, however, in that TC needs no
+knowledge of how vertex data is stored; it only needs to know
+connectivity information.  An application program creates an ACTCData
+structure and then repeats a cycle of optionally setting flags,
+inputting triangles, and then receiving the output primitives.<p>
+
+<h3>Language and Namespace</h3>
+
+TC 1.1 is provided with a C language interface.  Mostly this is
+because many people (including me) still prefer to program in C and I
+don't want to force people to write C++.  TC is also implemented in
+C, but I don't think this is that important, since you could implement
+the library internals in C++ and still export a C API.<p>
+
+The namespace of all functions and identifiers in TC is protected using
+the initials of my software organization <i>Applied Conjecture</i> and
+<code>TC</code>.  All functions in TC are prefixed with <code>actc</code>.
+All symbolic constants and <code>#defines</code> are prefixed with
+<code>ACTC_</code>.  All exported data structures are prefixed with
+<code>ACTC</code>.<p>
+
+<h3>Initialization and Errors</h3>
+
+An <code>ACTCData</code> consolidator object is created using the
+following code.  This structure contains state data about optional
+parameters and triangle connectivity.  <code>actcNew</code> returns
+either an initialized <code>ACTCData</code> object if successful or
+NULL if memory cannot be allocated.<p>
+
+
+<pre>
+    #include &lt;ac/tc.h&gt;
+
+    ACTCData *tc;
+
+    tc = actcNew();
+    if(tc == NULL) {
+	/* memory allocation failed */
+	/* print error here and exit or whatever */
+    }
+</pre>
+
+Any errors encountered during execution are typically both returned as
+results from a TC function and stored in the structure.  The error
+can be retrieved using <code>actcGetError</code>.  Here is an example of adding a
+triangle and checking the error.<p>
+
+<pre>
+    actcAddTriangle(tc, v1, v2, v3);
+    if((e = actcGetError(tc)) != ACTC_NO_ERROR) {
+	/* something bad happened */
+	/* print error and exit or whatever */
+    }
+</pre>
+
+A more compact representation may not use <code>actcGetError</code> at
+all, since many functions return either the error or
+<code>ACTC_NO_ERROR</code>.<p>
+
+<pre>
+    if((e = actcAddTriangle(tc, v1, v2, v3)) != ACTC_NO_ERROR) {
+	/* something bad happened */
+	/* print error and exit or whatever */
+    }
+</pre>
+
+Since the error is reset in the structure by
+<code>actcGetError</code>, it makes sense to go with either one style or
+the other, to avoid being confused when a later return from
+<code>actcGetError</code> returns an error which has already been
+handled.  Errors are represented by negative integers, so some
+functions may return non-error information as a positive integer.
+Slightly smarter applications may try
+to detect some failure conditions and proceed after some kind of
+repair.<p>
+
+<pre>
+    actcAddTriangle(tc, v1, v2, v3);
+    e = actcGetError(tc);
+    if(e == ACTC_ALLOC_FAILED) {
+	/* couldn't alloc memory using one of the malloc(3) family */
+	/* application can free unused memory and try again */
+    } else if(e != ACTC_NO_ERROR) {
+	/* something bad happened other than malloc failure */
+	/* print error and exit or whatever */
+    }
+</pre>
+
+For simplicity, examples in the remainder of the programmers' guide will not
+check for errors but will mention where errors may occur.  Several
+functions can result in the error ACTC_DATABASE_CORRUPT but are not
+noted here; that particular error return indicates corruption of
+ACTC's internal data structures and really requires debugging (as
+described below).<p>
+
+<h3>Parameters</h3>
+
+There are several options that may be set in the TC structure.  For
+example, whether TC honors triangle vertex ordering is controlled by
+the <code>ACTC_OUT_HONOR_WINDING</code> symbolic constant.  These values are set
+by <code>actcParami</code> and retrieved by <code>actcGetParami</code>.<p>
+
+<pre>
+    int isHonoringWinding;
+
+    actcParami(tc, ACTC_OUT_HONOR_WINDING, ACTC_TRUE);
+    actcGetParami(tc, ACTC_OUT_HONOR_WINDING, &isHonoringWinding);
+</pre>
+
+<code>actcGetParami</code> accepts two additional symbolic
+constants which may
+not be set by the application.  <code>ACTC_MAJOR_VERSION</code> and
+<code>ACTC_MINOR_VERSION</code> return the major version number and 
+minor version number, respectively.<p>
+
+Parameters are differentiated by the direction of the data they
+control.  <code>OUT</code> parameters control how TC hands its
+consolidated primitives back to you.  <code>IN</code> parameters tell
+TC the limits you intend to guarantee on your input data, which may
+used for optimization purposes.  <code>ALG</code> parameters directly
+affect the internal algorithms used by TC.  Some parameters require
+the extended range of <code>unsigned int</code>, and they can be set
+and queried by <code>actcParamu</code> and <code>actcGetParamu</code>,
+but both sets of <code>Param...</code> functions take the same symbolic
+constants and convert to-and-from the range of their parameter or
+return variable.  Here are the parameters available in TC 1.1:<p>
+
+<table border=3 width=100%>
+<tr><th>Enumerant</th><th>Data type</th><th>Meaning</th><th>Prefer Param<i>u</i></th></tr>
+<tr><td>ACTC_OUT_MIN_FAN_VERTS</td><td>integer</td><td>Minimum number of vertices
+returnable in a triangle fan</td><td>No</td></tr> 
+<tr><td>ACTC_OUT_HONOR_WINDING</td><td>boolean</td><td>Whether triangles may be output in reverse vertex order</td><td>No</td></tr>
+<tr><td>ACTC_OUT_MAX_PRIM_VERTS</td><td>integer</td><td>Maximum number of <i>vertices</i> to output in a primitive</td><td>No</td></tr>
+<tr><td>ACTC_IN_MIN_VERT</td><td>integer</td><td>Minimum vertex index</td><td>Yes</td></tr>
+<tr><td>ACTC_IN_MAX_VERT</td><td>integer</td><td>Maximum vertex index</td><td>Yes</td></tr>
+<tr><td>ACTC_IN_MAX_VERT_SHARING</td><td>integer</td><td>Maximum number of edges that will share a vertex</td><td>No</td></tr>
+<tr><td>ACTC_IN_MAX_EDGE_SHARING</td><td>integer</td><td>Maximum number of triangles that will share an edge</td><td>No</td></tr>
+</table><p>
+
+If called during <code>INPUT</code> or <code>OUTPUT</code>,
+<code>actcParami</code> can result in <code>ACTC_DURING_INPUT</code>,
+or <code>ACTC_DURING_OUTPUT</code>, respectively.  If called to set
+<code>ACTC_IN_MIN_VERT</code> or <code>ACTC_IN_MAX_VERT</code> so the
+vertex range is negative, or to set
+<code>ACTC_OUT_MAX_PRIM_VERTS</code> to less than 3, or to set a value
+associated with a symbolic constant ACTC does not know about, then the
+error <code>ACTC_INVALID_VALUE</code> will result.<p>
+
+<h3>Input/Output</h3>
+
+A TC structure is always in one of three modes; idle, inputting, or
+outputting.  Some operations are valid only in some modes.  For example,
+setting a parameter is an error unless the consolidator object is idle.
+Triangle data may only be entered in input mode.  Primitives may only
+be fetched in output mode.  Here's an example of how the modes work. 
+Please keep in mind that this example assumes a particular
+primitive.<p>
+
+<pre>
+    actcParami(tc, ACTC_OUT_MAX_PRIM_VERTS, 14);
+    actcBeginInput(tc);
+    actcAddTriangle(tc, 1, 2, 3);
+    actcEndInput(tc);
+    actcBeginOutput(tc);
+    prim = actcStartNextPrim(tc, &v1, &v2);
+    actcGetNextVert(tc, &v3);
+    actcEndOutput(tc);
+    
+    /* v1, v2, and v3 are now set to 1, 2, and 3. */
+</pre>
+
+<code>actcEndInput</code> and <code>actcEndOutput</code> are intended as
+checkpoints for optimization, compaction, etc.  Your application can
+call <code>actcGetIsDuringInput</code> and
+<code>actcGetIsDuringOutput</code> to determine if the TC object is
+currently ready in the input or output stages (or is otherwise idle). 
+If <code>actcParami</code> is called during input or output, an error of
+either <code>ACTC_DURING_INPUT</code> or <code>ACTC_DURING_OUTPUT</code>
+results, respectively.<p>
+
+<h3>Giving Triangles as Input</h3>
+
+Each triangle is entered into the TC database using
+<code>actcAddTriangle</code>, and the possible results may be
+<code>ACTC_DURING_OUTPUT</code> if TC is in output mode,
+<code>ACTC_IDLE</code> if TC is not in input mode, or
+<code>ACTC_ALLOC_FAILED</code> if an internal data structure could not
+be allocated.  In the last case, the database is not altered.  An
+application could perform compaction on its own data and try
+<code>actcAddTriangle</code> again, or it could attempt to retrieve all
+the primitives currently available from the database.  This would
+probably give worse results (more primitives, fewer vertices per
+primitive) than retrieving primitives from the complete database but
+may be better than getting no primitives at all.<p>
+
+<pre>
+     int triCount;
+     int tris[][3]; 
+
+     actcBeginInput(tc);
+     for(i = 0; i < triCount; i++)
+	 actcAddTriangle(tc, tris[i][0], tris[i][1], tris[i][2]);
+     actcEndInput(tc);
+</pre>
+
+<h3>Ranges of Various Input Data</h3>
+
+Vertex indices can be any <code>unsigned int</code>, and so
+anywhere from 0 to <code>UINT_MAX</code>, inclusive.  Internal data
+structures allow quantity <code>INT_MAX</code> vertices, edges, triangles,
+vertex valences, and edge valences to be input.  With the data
+structures TC uses
+as of version 1.1, on most machines at the time of writing, a process'
+memory space will be exhausted before the range of any of these items
+is exhausted. As of version 1.1, TC has not been tested on an
+architecture with integers or pointers larger that 32 bits.<p>
+
+<h3>Getting the Output Primitives</h3>
+
+Strips and fans are retrieved one at a time from TC starting with
+<code>actcStartNextPrim</code>.  The primitive type is returned, either
+<code>ACTC_PRIM_STRIP</code> or <code>ACTC_PRIM_FAN</code>. 
+<code>actcStartNextPrim</code> may also return
+<code>ACTC_DATABASE_EMPTY</code> if all triangles input so far have been
+returned in primitives.  <code>actcStartNextPrim</code> stores the first
+two vertices by reference, and
+<code>actcGetNextVert</code> provides each subsequent vertex.
+<code>actcGetNextVert</code> will return <code>ACTC_PRIM_COMPLETE</code>
+when their are no more vertices to return.
+
+<pre>
+     int prim;
+     int v1, v2;
+
+     actcBeginOutput(tc);
+     while((prim = actcStartNextPrim(tc, &v1, &v2) != ACTC_DATABASE_EMPTY) {
+	 /* start a primitive of type "prim" with v1 and v2 */
+	 while(actcGetNextVert(tc, &v3) != ACTC_PRIM_COMPLETE)
+	     /* continue primitive using v3 */
+     }
+     actcEndOutput(tc);
+</pre>
+
+<h3>One-Stop-Shopping (Convenience Function)</h3>
+
+There is a single function called
+<code>actcTrianglesToPrimitives</code> which inputs triangles and
+extracts primitives, including attempting to recover from low-memory
+situations by first draining the primitive database, and then by
+cleaning up unused memory if draining is not sufficient.  Since TC
+cannot know in advance how many primitives it can find (and thus how
+many vertices), the application will have to provide primitive storage
+large enough to hold the input data as independent triangles.  The
+application may also tell <code>actcTrianglesToPrimitives</code> how
+many triangles to input to TC before draining the database.
+The following example shows how an application might call
+<code>actcTrianglesToPrimitives</code>; here the application has provided
+<code>INT_MAX</code> as the maximum batch size in triangles, which
+effectively means input all the triangles first before outputting.<p>
+
+
+<pre>
+    int triangleCount;
+    int triangles[][3];
+    int *primLengths;
+    int *primVerts;
+    int *primCount;
+
+    /* get triangleCount and triangles from somewhere */
+    primLengths = (int *)malloc(sizeof(int) * triangleCount);
+    primTypes = (int *)malloc(sizeof(int) * triangleCount);
+    primVerts = (int *)malloc(sizeof(int) * 3 * triangleCount);
+    primCount = actcTrianglesToPrimitives(tc, triangleCount, triangles,
+	primTypes, primLengths, primVerts, INT_MAX);
+    if(primCount < 0) {
+	/* something bad happened */
+	/* print error and exit or whatever */
+    }
+</pre>
+
+<code>actcTrianglesToPrimitives</code> calls
+<code>actc{Begin,End}{Input,Output}</code>, <code>actcAddTriangle</code>,
+<code>actcGetNext{Prim,Vertex}</code>, and <code>actcMakeEmpty</code>.
+It returns any unrecoverable error it may receive from these functions,
+or it will return the total number of strips and fans it finds.  The types
+and length in vertices of all primitives are stored in primTypes and
+primLengths, and then the vertices for each primitive in turn are
+stored sequentially in primVerts.<p>
+
+<h3>Memory Usage Statistics</h3>
+
+Call <code>actcGetMemoryAllocation</code> to make TC search how much 
+memory is being used in data structures.  This may be an expensive
+operation in TC 1.1 in that it searches the allocated data structures.<p>
+
+<h3>Dumping Internal State</h3>
+
+See below for information on compiled TC so that it automatically dumps
+debugging
+information on an internal error.  If you believe you are getting
+incorrect results from TC, your application can call
+<code>actcDumpState</code> to print out the internal state of a TC
+object (in no particular format).  In order for me to help you debug a
+problem, it would be useful to print out the TC version number, the
+triangles you input to TC (in the order you input them), and the
+output of <code>actcDumpState</code> at the beginning and end of your
+output phase.  <code>actcDumpState</code> has no return value.<p>
+
+<h3>Cleaning Up</h3>
+
+To stop input or output with TC and empty the database for a
+particular TC object, use <code>actcMakeEmpty</code>; the TC object will
+be reset to idle, contain no triangles, and will be ready for another
+set of input triangles.  <code>actcMakeEmpty</code> returns any error
+that occurs during cleanup, but for the 1.1 release it can only return
+<code>ACTC_NO_ERROR</code>.<p>
+
+To free the memory associated with a TC object, call
+<code>actcDelete</code> with the pointer to the object; this function
+effectively calls <code>actcMakeEmpty</code> and then frees the TC
+internal data.  Further use of that TC object pointer will have
+undefined results but will probably crash your application.<p>
+
+<p><hr><p>
+<center><h2>Specific Solutions</h2></center>
+
+<h3>Producing Only Strips</h3>
+
+To produce only triangle strips, set
+<code>ACTC_OUT_MIN_FAN_VERTS</code> to INT_MAX.  Technically, a very
+large triangle fan could still be formed, but when someone creates a
+two billion vertex triangle fan with TC, I will consider it a success
+rather than a failure.<p>
+
+<pre>
+    actcParami(tc, ACTC_OUT_MIN_FAN_VERTS, INT_MAX);
+</pre>
+
+<h3>Producing Limited-Length Primitives</h3>
+
+I have heard that Silicon Graphics' RealityEngine graphics and
+derivatives have an optimium strip size of 12 vertices.  Set
+<code>ACTC_OUT_MAX_PRIM_VERTS</code> to set the maximum number of vertices to produce
+per primitive.<p>
+
+<pre>
+    actcParami(tc, ACTC_OUT_MAX_PRIM_VERTS, 12);
+</pre>
+
+<h3>Ignoring Triangle Winding</h3>
+
+If your triangle set does not have a preferred triangle winding,
+set <code>ACTC_OUT_HONOR_WINDING</code> to FALSE or 0.  This has the effect of allowing
+a triangle to be included in a primitive even if its vertices would
+be drawn in reverse order.  Note that every odd triangle in a strip
+(counting from 0) will normally be wound backwards if winding is
+honored.<p>
+
+<pre>
+    actcParami(tc, ACTC_OUT_HONOR_WINDING, ACTC_TRUE);
+</pre>
+
+<p><hr><p>
+<center><h2>TC SDK</h2></center>
+
+<h3>Building TC</h3>
+
+My preference for using this module is to compile tc into a <code>.a</code>
+library.  The makefile provided by default has targets for the library and
+the sample programs:
+
+<pre>
+    make libactc.a
+</pre>
+
+To turn on some simple debugging assistance, compile TC with the
+<code>DEBUG</code> preprocessor symbol defined (<code>-DDEBUG</code>
+for most UNIX compilers).  Error conditions should print the reason
+and the function in which the error occurred.  Any function finding an
+unexpected inconsistency in data structures (like performing a table
+search and not finding an element which must be there) will call
+<code>abort()</code> and presumably dump core.  I wouldn't expect any
+ordinary application developer to be able to debug TC from a core
+file, of course.  If <code>INFO</code> is also defined, then the
+<code>abort()</code> call will be preceded by a dump of the internal
+data structures in tc.  If you would like me to debug TC based on your
+input, it would help me to have this output as well as the set of
+triangles originally input to TC.<p>
+
+<h3>Sample Programs and Tests</h3>
+
+The <code>actctest</code> program makes sure the basic TC functions
+work.  If it prints anything when compiled with actc.c without
+<code>DEBUG</code> and <code>INFO</code>, then something bad
+happened.<p>
+
+The <code>actctest2</code> program repeatedly inputs random data into TC
+and makes sure it gets the same thing out as it received.  You can
+specify settings for any of the <code>OUT</code> parameters, and change the 
+seed that <code>actctest2</code> uses to initialize the random number
+generator.<p>
+
+The <code>actcsample</code> program takes in a particular word-based format
+containing
+vertices and triangles, and converts that data into strips and fans.  It
+passes the vertex list through verbatim.  Someone could
+use this either as an element in a tool pipeline or as the basis for a
+new offline or interactive stripping tool.  Here's what the input format
+looks like:
+<pre>
+    [x y z nx ny nz r g b]
+    [x y z nx ny nz r g b]
+    [...]
+    end
+    triangle v1 v2 v3 end
+    [triangle v1 v2 v3 end]
+    [...]
+    end
+</pre>
+In this example, <i>x</i>, <i>y</i>, and <i>z</i> are the vertex coordinates,
+<i>nx</i>, <i>ny</i>, and <i>nz</i> are the vertex normals, and
+<i>r</i>, <i>g</i>, and <i>b</i> are the vertex colors.  The set of
+vertices are terminated by the word <code>end</code>.  Vertices are
+optional and are only passed straight through.  For each triangle, <i>v1</i>,
+<i>v2</i>, and <i>v3</i> are the indices of each vertex in the triangle.
+Each triangle is terminated by the word <code>end</code>, and the list
+of triangles is terminated by <code>end</code>.  The output format is
+similar, except that the <code>triangle</code> section is replaced by a list
+of primitives.  Here's what the output format looks like:
+<pre>
+    [x y z nx ny nz r g b]
+    [x y z nx ny nz r g b]
+    [...]
+    end
+    strip v1 v2 v3 [v4 [v5 [...]]] end
+    fan v1 v2 v3 [v4 [v5 [...]]] end
+    [...]
+    end
+</pre>
+Running 
+
+<h3>Portability</h3>
+
+TC should be pretty portable, for the most part.  I placed my "timer"
+snippet in <code>actctest2</code>, and it will need tweaking on anything
+but Linux, IRIX, and Windows 98.  If you'd like to submit a patch to
+"timer" for another operating system, I will place it on my web page
+and incorporate it into TC.<p>
+
+<p><hr><p>
+<center><h2>Miscellaneous</h2></center>
+
+<h3>Reliability</h3>
+
+I've spent some time testing TC against some strange triangle sets.  I've
+gone so far as to create random triangle data (random numbers of
+triangles with random ranges of vertices), put it in to TC, and check
+to make sure the same triangles come out as went in.  I've even gone
+as far as to artificially reduce the amount of memory available to 8M,
+under which TC seems to reliably consolidate triangles, but the data set
+may degenerate under such conditions to being exactly the input data.<p>
+
+<h3>Runtime Performance</h3>
+
+TC 1.1 looks like it can consolidate somewhere around one hundred
+thousand triangles per second on a 400 MHz Pentium III for data sets
+in the thousands of vertices, and somewhere around thirty thousand
+triangles per second for data sets around three hundred thousand
+vertices.  I suspect this could be improved only a little bit more with
+some clever avoidance of searching the vertex-to-edge mapping.
+Most of the data structures internal to TC are constant-time operations,
+especially if the vertex range is small.<p>
+
+I have tested TC's performance against an optimized <i>meshifier</i>
+modified by Randall Frank at Lawrence Livermore National Labs and
+<i>meshifier</i> appears to run about twice as fast, probably because it
+doesn't check for errors internally very well and makes some assumptions
+about vertex and edge connectivity.  Perhaps TC could approach that
+performance level if the internal consistency checks were made to compile
+conditionally.<p>
+
+<h3>Stripping Performance</h3>
+
+TC uses a least-connected-vertex approach to making triangle strips,
+under the assumption that such vertices will be at the corners of
+patches of connected triangles, and the stripification algorithm will
+hopefully peel triangle strips off the outside of the patch first,
+in order to avoid fragmenting the triangle set.  This is the same
+approach Neal Tringham's improved <i>meshifier</i> used.
+I have yet to test TC's vertices-per-strip performance against other
+triangle strippers, but it should do at least as well as <i>meshifier</i>.<p>
+
+The algorithm attempts to remove all the triangle fans first.  I've found
+that this works for fewer than half of the simple data files I've tried.
+For 1.1 the default value associated with <code>ACTC_OUT_MIN_FAN_VERTS</code>
+is set to INT_MAX.  Other good values appear to be near 8 and 16.  You'll
+have to try it yourself to see how it works with your data.<p>
+
+One could conceivably implement simulated annealing with TC.  An
+application would repeatedly calculate solutions to triangle sets with
+TC, swapping the order of some number of triangles, each time choosing
+the better solution.  As time goes on, the number of triangles rotated
+could be reduced.  Simulated annealing will typically give a pretty
+good solution while allowing the application to choose how much time
+it cares to spend to find a solution.<p>
+
+<p><hr><p>
+
+Revision Control Information: $Header: /home/grantham/cvsroot/projects/modules/tc/manual.html,v 1.15 2000/11/22 20:18:26 grantham Exp $<p>
+
+</body>
+</html>
+
+<!--
+vi:tabstop=8
+-->

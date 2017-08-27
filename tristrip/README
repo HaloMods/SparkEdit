@@ -1,0 +1,31 @@
+ACTC 1.1 - Brad's Triangle Consolidator
+
+ACTC converts independent triangles into triangle strips or fans.  You
+can approach a three times geometry speedup on OpenGL and Direct3D
+using triangle strips and fans.  If the speed of your application is
+limited by how fast your graphics card can paint pixels (and not
+transform vertices) then this speedup won't help your frame rate, but
+it may free up CPU cycles for more work in your program, which can in
+turn do a better job of telling the card what to draw.  You'll find
+a more detailed introduction to using ACTC in "manual.html".
+
+ACTC does *not* turn unindexed triangle data into indexed triangle data.
+In other words, it will not turn find duplicate vertices in raw 3D vertex
+data. (I'm hoping to write a layer on ACTC for that.)
+
+I am not aware of any bugs but I haven't tested the module very
+thoroughly against real-life data.  If you find bugs, please visit the
+ACTC page on SourceForge at ... and submit a descriptive bug report
+including the offending data file, and ACTC's version number.
+
+You can find the most recent release of ACTC by navigating my home page
+at http://www.plunk.org/~grantham/.
+
+A quick note about clause #5 in the COPYRIGHT.  All I really want is
+to feel some amount of satisfaction that you're using something on
+which I worked hard.  An email saying something like "Hey, I'm Joe
+Shmoe, and I'm using your code in my widget counter for Orchard Supply
+Hardware" is sufficient.
+
+		-Brad Grantham
+		 November 23rd, 2000

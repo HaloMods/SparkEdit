@@ -1,0 +1,264 @@
+SparkEdit Version 3.0
+created by Grenadiac
+www.halomods.com
+
+NOTE:
+
+Control interfaces have changed dramatically.  See description:
+-Selection:  Activate Select Mode using the toolbar or "Tools..." menu.  Activate a selection mode on the Edit Tab.  Select an object by clicking on it.  Select multiple objects by holding the CTRL key while selecting.  When objects are selected and  the edit mode is changed, the selection list is locked and cannot be changed unless selection mode is activated again.
+
+-Translation:  Activate Translate Mode using the toolbar or "Tools..." menu.  Object selections are now locked.  Move items using mouse movement while holding down left mouse button.  Move objects up/down by holding down CTRL while holding down the left mouse button.
+
+-Rotation:  Activate Rotate Mode using the toolbar or "Tools..." menu.  Object selections are now locked.  Rotate an item in YAW using mouse movement while holding down left mouse button.  Rotate an object in PITCH/ROLL by holding down CTRL while holding down the left mouse button.  On the edit tab, there is a button to reset rotations to zero. 
+
+NOTE:  Using Tag Import
+Tag import is used to add items to the scenario that exist as tags, but are not in the spawn reference pool.  What this means is that you can ADD new vehicles and scenery items by rebuilding with HMT and adding the "vehi" and "scen" renamed tags.  When you select this item from the tools menu, it automatically detects which tags are not enabled in the scenario and allows you to enable them one at a time.
+
+
+SparkEdit 3.02  (3/4/04)
+-----------------------------------------------------------
+-fixed scenery tag import bug
+
+SparkEdit 3.01  (2/23/04)
+-----------------------------------------------------------
+-fixed MP Equipment duplication bug that causes a sparkedit crash
+-fixed mapfile close function so it releases the file when File->Close is selected.
+
+SparkEdit 3.0  (2/22/04)
+-----------------------------------------------------------
+-fixed crash/memory corruption bug on trigger viewing
+-added ctrl-c hotkey for duplication
+-added ctrl-t hotkey for adding a teleporter
+-added del hotkey for deleting an object
+-fixed rotate snap bug
+-fixed "teleporter add" rendering bug
+
+SparkEdit 3.0 Beta Release Candidate 1 (2/21/04)
+-----------------------------------------------------------
+-fixed some corruption bugs for certain maps (thanks Stefander)
+-hooked up the view info dialog to the toolbar
+-added tag import into the scenario for vehicles and scenery
+-Known Bugs:  Trigger volumes seems to be causing some kind of memory corruption problem.
+
+SparkEdit 3.0 Beta 11 (2/19/04)
+-----------------------------------------------------------
+-added duplicate/delete to the menus
+-added teleporter duplication
+-added rotation snaps
+-fixed missing trigger volumes, but it is buggy - avoid using until memory corruption bug is found
+
+SparkEdit 3.0 Beta 10 (2/18/04)
+-----------------------------------------------------------
+-added object deletion for scenery, vehicles, MP Equip
+-added mapfile report/offset list exporting
+-fixed crash bug related to bsp_mesh_info selection mode
+-fixed a couple of memory access errors (uninitialized memory)
+-fixed mis-labled help box
+
+SparkEdit 3.0 Beta 9 (2/17/04)
+-----------------------------------------------------------
+-fixed crash bug when switching to an invalid selection mode on MP maps while an object was selected
+-added support for control and control_ref scenario items to fix corruption problem on some maps
+-began implementation of adding items to the reference pool for vehicles and scenery
+
+SparkEdit 3.0 Beta 8 (2/15/04)
+-----------------------------------------------------------
+-fixed crash bug on bsp-info select for xbox
+-added scenery duplication
+-added vehicle duplication
+-added MP Equipment duplication
+
+Known Bugs:
+-crash occurs sometimes when editing a multiplayer map when you try to change edit modes
+
+SparkEdit 3.0 Beta 7 (2/8/04)
+-----------------------------------------------------------
+-changed tag compiling to MonoxideC's recommended method.
+-added edit modes (select,translate,rotate).  Included menu and toolbar changes.
+-added mouse move rotation (yaw on x-mouse, hold down alt for x-y control of yaw/pitch)
+-use select mode along with ctrl to make selections.  Switch to translate or rotate mode avoids deselect problem.
+-added object rotation reset button
+-updated control help
+-removed old rotation controls
+
+Known bugs:
+-info button on toolbar is not working yet.
+
+SparkEdit 3.0 Beta 6 (1/29/04)
+-----------------------------------------------------------
+-Added LOD select on model drawing tab
+-Fixed Model Rendering, LODs and model variations are not rendered on top of each other
+-Boosted Render Performance by fixing model rendering
+-BugFix:  Fixed mouse move bug in Beta 5, mouse movement is now very stable
+-BugFix:  Fixed hidden model selection in GUI on Model Tab
+-BugFix:  Camera does not reset when switching out of model mode
+
+SparkEdit 3.0 Beta 5 (1/22/04)
+-----------------------------------------------------------
+-Added mouse move of objects
+-Known Bug - if moving object with mousemove, and mouse goes over
+ a mesh that is closer, object will appear to jump suddenly.
+
+SparkEdit 3.0 Beta 4 (1/17/04)
+-----------------------------------------------------------
+-Added object swap for most object types
+
+SparkEdit 3.0 Beta 3 (1/12/04)
+-----------------------------------------------------------
+-fixed memory cleanup bug that was causing a crash
+
+SparkEdit 3.0 Beta 3 (1/12/04)
+-----------------------------------------------------------
+-fixed pitch and roll rotations so they match in-game rotations
+-added trigger viewing
+
+SparkEdit 3.0 Beta 2 (1/8/04)
+-----------------------------------------------------------
+-Added model preview mode
+
+SparkEdit 3.0 Beta 1 (1/7/04)
+-----------------------------------------------------------
+-added object multi-select (hold down ctrl key while selecting)
+-fixed rotation save bug (pitch and roll was not getting saved)
+-started implementing model-view mode
+-added arrows to show "facing" direction for player spawns
+
+SparkEdit 2.5 (12/22/03)
+-----------------------------------------------------------
+Since I'm going on vacation for 2 weeks, I thought I would release SparkEdit before I left.  Have fun!
+
+...and please report all bugs to the www.halomods.com sparkedit forum.
+
+IMPORTANT README:
+
+SparkEdit.ini no longer exists.  All program options are now set in the Tools->Options menu and are stored in binary form in sparkedit.dat.  You set all options in the GUI now.
+
+Performance Tweaking:  In the options dialog, there are several draw distances you can edit.  If your sparkedit is running REALLY slow, or if you want to optimize it, adjust these distances to smaller values.  The model draw distances tell the renderer to enable high-detail (ie, model drawing) at this distance from the camera.  If the object is farther away, it will be drawn as box.  Adjusting these distances will reduce the number of polygons that SparkEdit has to render and will boost performance.
+
+-----------------------------------------------------------
+New Features:
+-Added new tab-based tool interface
+-Added Mesh info to edit tab; click on a mesh, get info
+-Added model rendering to sparkedit
+-Added frustum culling for BSP and models
+-Moved options out of ini file; all options are done in the GUI
+-Added Look Mode (right double mouse click to toggle)
+-Added object rotation editing (NOTE:  some object only rotate in yaw)
+-more complete texturing (most textures load now)
+-Added XBOX mapfile compression (for LAN parties, tutorial coming soon by Zipl0c)
+-Added "View Info" for selected objects to show that object's properties (bitmaps, models, meta info)
+-Added support for viewing new tags (bipeds, devices, equipment, weapons, etc)
+-Added framerate display
+
+-----------------------------------------------------------
+Controls - see the Help menu.
+
+Coord Finder - Upon entering a x,y,z coordinate into the edit boxes and clicking the "Find Coord" button, SparkEdit will paint a blinking green box at that coordinate. It may be easier to put the rendering mode into point or mesh to make finding the coordinate easier.
+
+Object selection - On the Edit Tab, Select the edit mode you want to use.  For BSP Mesh Info, 
+clicking on a world mesh will list the mesh properties (triangle count, textures, etc).  Other modes allow you to move and rotate objects within the map, and also to view their properties.
+
+To view the selection properties, click on the "view info" button.  This is a modeless dialog, meaning that you can continue editing with this dialog active.  The dialog will update every time you click on a selectable object.
+
+
+New object movement controls:
+
+<PAGE UP>     Move selected object along +Z axis
+<PAGE DOWN>   Move selected object along -Z axis
+<LEFT ARROW>  Move selected object along +X axis
+<RIGHT ARROW> Move selected object along -X axis
+<UP ARROW>    Move selected object along +Y axis
+<DOWN ARROW>  Move selected object along -Y axis
+
+Mouse + Double Right Click - toggle look mode on/off (behaves like a 1st person shooter)
+
+Y - adjust yaw rotation of selected object
+P - adjust pitch rotation of selected object
+R - adjust roll rotation of selected object
+
+NOTE:  some objects can only be rotated in Yaw.  For those objects, pitch and roll editing will have no effethanksct.
+
+-----------------------------------------------------------
+KNOWN BUGS:
+
+-Some models are not rendered properly (the AR in BG for example).  
+-On higher end video cards the framerate displays 16 fps all the time, even though max framerate is currently set at 20fps.
+-Small memory leak of about 100k occurs for every map loaded.
+-some objects that are rotated are not properly culled
+-Banshee model is not perfect
+-Not all textures work; some textures will be wrong, especially transparent
+
+-----------------------------------------------------------
+DESCRIPTION:
+
+Sparkedit is a map viewer and editor for Halo (xbox and PC). It was created to give modders insight into how the maps were constructed by the original developers.
+
+-----------------------------------------------------------
+NOTE:  make backups of your map files!!!  If you open a compressed file, it will write changes to the existing cache.tmp file in the working directory.
+-----------------------------------------------------------
+
+***Changelog***:
+-----------------------------------------------------------
+Version 2.0 (10/25/03)
+
+New Features:
+-added HPC map loading functionality
+-added multiple BSP loading (SparkEdit now loads all the bsp sections)
+-added sparkedit.ini file
+-redesigned the BSP loader
+
+Known Bugs:
+-Doesn't load all shaders
+
+-----------------------------------------------------------
+Version 1.1 (10/15/03)
+
+New Features:
+-Added camera location tracker
+-Added camera location reset
+-Added a "close file" feature
+-Changed file permissions so that "cache.tmp" could be copied during editing
+-Fixed a camera bug where tip/tilt would be limited
+-Editing teleporter ORIGIN AND destinations 
+-Editing scenery positions 
+-Editing weapon, vehicle and powerup spawn points 
+-Editing rally waypoints 
+-Editing player spawn points 
+-Editing king of the hill point 
+-Shows a description of selected object
+-Mesh export to a .obj file (still buggy, doesn't work on all maps)
+
+
+Fixes:
+-changed Flat Shading to include polygon lines drawing
+-improved zbuffering problem on low-end video cards
+-Fixed dark rendering when textured mode isn't selected during map load
+
+
+Known Bugs:
+-Doesn't load all shaders
+
+-----------------------------------------------------------
+Version 1.0 (9/25/03)
+
+Fixes:
+-Changed version numbers to release version
+
+Known Bugs:
+-Zbuffering problem on certain videocards (MonoxideC)
+-Mesh dislocation problem (MonoxideC)
+-Doesn't load all shaders
+
+-----------------------------------------------------------
+
+Currently supported levels:  All of them ;)
+
+-----------------------------------------------------------
+For support or technical issues, and for making suggestions or reporting bugs, go to the sparkedit forums, or come to our irc channel.
+
+Forums located at: www.halomods.com/forums
+Irc channel: (server in transition) | #sparkedit-beta (betatesters are voiced (+v))
+
+------------------------------------------------------------
+
+Special thanks to PfhorSlayer and the guys at #halo-dev.  Thanks go to kornkob for his help with the scenario structs.  Special Thanks to MonoxideC and tjc2k4 for their help on model and tag issues.  Thanks to the beta testing team:  SourceGuy, MonoxideC, Boll, N-, Gil222, Aztec, icanttype, Ma_Say_Gac, Stefander.

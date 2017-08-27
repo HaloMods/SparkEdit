@@ -1,0 +1,126 @@
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by SparkEdit.rc
+//
+#define IDD_ABOUTBOX                    100
+#define IDR_MAINFRAME                   128
+#define IDR_SPARKETYPE                  129
+#define IDD_TOOLS1                      130
+#define IDD_OUTPUT_PANE                 131
+#define IDD_CONTROLS_HELP_DLG           137
+#define IDD_OPTIONS_DLG                 138
+#define IDD_TOOLS2                      139
+#define IDC_CURSOR1                     139
+#define IDD_TOOL_TEMPLATE               140
+#define IDD_TOOLSHEET                   141
+#define IDD_TOOL_NAVIGATE               142
+#define IDD_TOOL_EDIT                   143
+#define IDD_OBJECT_INFO                 144
+#define IDD_TOOL_MODELS                 147
+#define IDD_IMPORT_SCENARIO_TAG         149
+#define IDC_GL_SELECT                   151
+#define IDD_ANALYZE_DATA_DLG            152
+#define IDC_OUTPUT_WIN                  1000
+#define IDC_RENDER_MODE                 1002
+#define IDC_TRAVEL_SPEED                1003
+#define IDC_FIND_COORD_X                1004
+#define IDC_FIND_COORD_Y                1005
+#define IDC_FIND_COORD_Z                1006
+#define IDC_FIND_COORD                  1007
+#define IDC_INVERT_MOUSE_LOOK           1008
+#define IDC_TRANSLATE_SPEED             1008
+#define IDC_CAMERA_LOCATION             1009
+#define IDC_SEL_VEHICLES                1010
+#define IDC_SEL_SCENERY                 1011
+#define IDC_SEL_WEAPONS                 1012
+#define IDC_SEL_PLAYER_SPAWNS           1013
+#define IDC_SEL_ITEM_COLL               1014
+#define IDC_SEL_MP_FLAGS                1014
+#define IDC_INFO                        1015
+#define IDC_SEL_MP_EQUIP                1016
+#define IDC_RESET_CAMERA                1017
+#define IDC_ACTIVE_BSP                  1018
+#define IDC_TAB1                        1020
+#define IDC_TOOL_TAB                    1021
+#define IDC_LIST1                       1022
+#define IDC_MODEL_LIST                  1022
+#define IDC_SHEET_HOLDER                1023
+#define IDC_SELECTION_MODE              1023
+#define IDC_OBJECT_INFO                 1024
+#define IDC_VIEW_OBJ_INFO               1025
+#define IDC_BITMAPS_PATH                1026
+#define IDC_SHOW_VEHICLES               1027
+#define IDC_DRAW_DIST_VEHICLES          1028
+#define IDC_SHOW_SCENERY                1029
+#define IDC_DRAW_DIST_SCENERY           1030
+#define IDC_SHOW_WEAPONS                1031
+#define IDC_DRAW_DIST_WEAPONS           1032
+#define IDC_SHOW_DEVICES                1033
+#define IDC_DRAW_DIST_DEVICES           1034
+#define IDC_SHOW_BIPEDS                 1035
+#define IDC_DRAW_DIST_BIPEDS            1036
+#define IDC_CULL_DISTANCE               1037
+#define IDC_SHOW_EQUIPMENT              1038
+#define IDC_DRAW_DIST_EQUIPMENT         1039
+#define IDC_FRAMERATE                   1040
+#define IDC_BITMAPS_PATH3               1040
+#define IDC_VIEW_TRIGGERS               1041
+#define IDC_OBJECT_TYPE                 1042
+#define IDC_MODEL_LOD                   1043
+#define IDC_MODEL_MARKERS               1044
+#define IDC_RESET_ROTATION              1045
+#define IDC_PALLETTE_TYPE               1046
+#define IDC_PALLETTE_TYPE2              1047
+#define IDC_AVAILABLE_TAGS              1047
+#define IDC_SNAP_YAW                    1048
+#define IDC_SNAP_PITCH                  1049
+#define IDC_SNAP_ROLL                   1050
+#define IDC_CURRENT_YAW                 1051
+#define IDC_CURRENT_PITCH               1052
+#define IDC_ANALYZE_OFFSET              1052
+#define IDC_CURRENT_ROLL                1053
+#define IDC_ANALYZE_SIZE                1053
+#define IDC_ANALYZE_MAGIC               1054
+#define IDC_CEBITMAPS_PATH              1055
+#define IDC_BITMAPS_PATH2               1056
+#define ID_OPEN_CACHEFILE               32771
+#define ID_OPEN_COMPRESSED              32772
+#define ID_HELP_CONTROLS                32774
+#define ID_FILE_EXPORTMESHTOOBJ         32775
+#define ID_SEARCH_FOR_VERT_START        32776
+#define ID_FILE_SAVECHANGES             32777
+#define ID_IMPORT_OBJ                   32778
+#define ID_FILE_CLOSECACHEFILE          32779
+#define ID_FILE_COMPRESSEXISTINGMAP     32780
+#define ID_FILE_COMPRESS_MAP            32781
+#define ID_BUTTON32782                  32782
+#define ID_BUTTON_INFO_DLG              32782
+#define ID_TOOLS_OPTIONS                32783
+#define ID_TOOLS_DUMPTAGINFO            32784
+#define ID_BUTTON_TRANSLATE_MODE        32785
+#define ID_BUTTON_ROTATE_MODE           32786
+#define ID_BUTTON_SELECT_MODE           32789
+#define ID_TOOLS_SELECTMODE             32790
+#define ID_TOOLS_TRANSLATEMODE          32791
+#define ID_TOOLS_ROTATEMODE             32792
+#define ID_TOOLS_IMPORTTAGINTOSCENARIO  32793
+#define ID_EDIT_DELETE                  32795
+#define ID_BUTTON_DEL                   32796
+#define ID_TOOLS_DUPLICATESELECTION     32797
+#define ID_TOOLS_DELETESELECTION        32798
+#define ID_TOOLS_ADDTELEPORTERPAIR      32799
+#define ID_TOOLS_EXPORTMETA             32800
+#define ID_TOOLS_ANALYZEEXTERNALFILE    32801
+#define ID_TOOLS_ANALYZE_EXTERN         32802
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_3D_CONTROLS                     1
+#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_COMMAND_VALUE         32803
+#define _APS_NEXT_CONTROL_VALUE         1053
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif
